@@ -34,10 +34,12 @@ fi
 CUDA_VISIBLE_DEVICES=
 num_total_gpus=`nvidia-smi -L | wc -l`
 num_gpus_assigned=0
+nvidia-smi_query=`nvidia-smi -i 0 -q -d UTILIZATION| grep -A4 -i gpu | egrep -i "gpu" | awk 'FNR==3{print $3}'`
 
 for i in `seq 0 $[$num_total_gpus-1]`; do
 # going over all GPUs and check if it is idle, and add to the list if yes
-  if nvidia-smi -i $i | grep "No running processes found" >/dev/null; then
+  #if nvidia-smi -i $i | grep "No running processes found" >/dev/null; then
+  if [ $nvidia-smi_query -lt 50 ]; then    
     CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}$i, && num_gpus_assigned=$[$num_gpus_assigned+1]
   fi
 # once we have enough GPUs, break out of the loop
